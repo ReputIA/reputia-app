@@ -1,0 +1,51 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model utilisateur {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  nom           String
+  prenom        String
+  entreprise    String
+  siret         String?
+  adresse       String
+  codePostal    String
+  ville         String
+  abonnement    Boolean  @default(false)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model message_support {
+  id        Int      @id @default(autoincrement())
+  email     String
+  contenu   String
+  reponse   String?  
+  createdAt DateTime @default(now())
+}
+
+model password_reset_token {
+  id         Int      @id @default(autoincrement())
+  email      String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+model email_verification_token {
+  id         Int      @id @default(autoincrement())
+  email      String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
