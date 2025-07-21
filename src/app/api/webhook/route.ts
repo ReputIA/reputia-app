@@ -13,7 +13,7 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 async function activateAbonnement(email: string, source: string) {
   try {
     const updated = await prisma.utilisateur.updateMany({
-      where: { email },
+      where: { email: email.toLowerCase() }, // sécurise la casse
       data: { abonnement: true },
     });
 
@@ -56,7 +56,11 @@ export async function POST(req: Request) {
   // ✅ 1. Paiement validé via Checkout (ex : paiement direct sans trial)
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const email = session.customer_email;
+
+    const email =
+      session.customer_email ||
+      (session.customer_details && session.customer_details.email) ||
+      null;
 
     if (email) {
       await activateAbonnement(email, "checkout.session.completed");
