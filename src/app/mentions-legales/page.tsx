@@ -16,20 +16,20 @@ export default function MentionsLegales() {
         <p className="text-gray-300">
           Le site ReputIA est édité par :  
           <br />
-          <strong>ReputIA</strong>, SASU au capital de 1000 €  
+          <strong>ReputIA</strong>, SASU au capital de 500 €  
           <br />
-          SIRET : [TON SIRET ICI]  
+          SIRET : 98908860400016  
           <br />
-          Siège social : [TON ADRESSE POSTALE ICI]  
+          Siège social : 24 av marie curie 31600 seysses  
           <br />
-          Email : contact@reputia.fr
+          Email : support@reputia.fr
         </p>
 
         <h2 className="text-xl font-semibold text-[#FFD700] mt-6 mb-2">
           Directeur de la publication
         </h2>
         <p className="text-gray-300">
-          [Ton Nom] – Fondateur de ReputIA
+          RUIZ Anthony – Fondateur de ReputIA
         </p>
 
         <h2 className="text-xl font-semibold text-[#FFD700] mt-6 mb-2">
@@ -38,11 +38,11 @@ export default function MentionsLegales() {
         <p className="text-gray-300">
           Le site est hébergé par :  
           <br />
-          <strong>Netlify, Inc.</strong>  
+          <strong>Vercel Inc.</strong>  
           <br />
-          2325 3rd Street, Suite 296, San Francisco, California 94107  
+            340 S Lemon Ave #4133 Walnut, CA 91789 Etats-Unis
           <br />
-          Site web : <a href="https://www.netlify.com/" className="text-[#FFD700] hover:underline">https://www.netlify.com</a>
+          Site web : <a href="https://www.vercel.com/" className="text-[#FFD700] hover:underline">https://www.vercel.com</a>
         </p>
 
         <h2 className="text-xl font-semibold text-[#FFD700] mt-6 mb-2">

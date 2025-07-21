@@ -7,12 +7,11 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { Analytics } from '@vercel/analytics/react'; // 👈 Ajout ici
 
 function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-
-  // ✅ Ne pas afficher le logo sur la page d'accueil
   const isHomePage = pathname === '/';
 
   return (
@@ -28,8 +27,6 @@ function Header() {
           />
         </Link>
       )}
-
-      {/* Droite : email + déconnexion seulement si connecté */}
       {status === 'authenticated' && (
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-300">{session.user?.email}</span>
@@ -49,7 +46,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
-        {/* ✅ Favicon */}
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <title>ReputIA – Automatisez vos réponses aux avis</title>
         <meta
@@ -62,6 +58,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Header />
           <main>{children}</main>
         </SessionProvider>
+        <Analytics /> {/* 👈 Intégré ici */}
       </body>
     </html>
   );
