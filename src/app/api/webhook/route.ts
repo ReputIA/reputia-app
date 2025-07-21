@@ -9,27 +9,39 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 const prisma = new PrismaClient();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// Fonction réutilisable pour activer l’abonnement via email
+// ✅ Fonction pour activer l’abonnement
 async function activateAbonnement(email: string, source: string) {
   try {
     const updated = await prisma.utilisateur.updateMany({
-      where: { email: email.toLowerCase() }, // sécurise la casse
+      where: { email: email.toLowerCase() },
       data: { abonnement: true },
     });
-
     console.log(`✅ [${source}] Abonnement activé pour ${email}`, updated);
   } catch (error) {
-    console.error(`❌ [${source}] Erreur lors de la mise à jour de l’abonnement :`, error);
+    console.error(`❌ [${source}] Erreur activation :`, error);
   }
 }
 
-// Fonction pour récupérer l’email à partir de l’ID client Stripe
+// ❌ Fonction pour désactiver l’abonnement
+async function desactiverAbonnement(email: string, source: string) {
+  try {
+    const updated = await prisma.utilisateur.updateMany({
+      where: { email: email.toLowerCase() },
+      data: { abonnement: false },
+    });
+    console.log(`❌ [${source}] Abonnement désactivé pour ${email}`, updated);
+  } catch (error) {
+    console.error(`❌ [${source}] Erreur désactivation :`, error);
+  }
+}
+
+// 🎯 Récupération email via ID client Stripe
 async function getEmailFromCustomer(customerId: string): Promise<string | null> {
   try {
     const customer = await stripe.customers.retrieve(customerId);
     return typeof customer === 'object' && 'email' in customer ? customer.email ?? null : null;
   } catch (err) {
-    console.error(`❌ Erreur récupération email du client ${customerId} :`, err);
+    console.error(`❌ Erreur récupération email client ${customerId} :`, err);
     return null;
   }
 }
@@ -53,10 +65,9 @@ export async function POST(req: Request) {
 
   const logPrefix = `🔔 [${event.type}]`;
 
-  // ✅ 1. Paiement validé via Checkout (ex : paiement direct sans trial)
+  // ✅ Paiement validé via Checkout
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-
     const email =
       session.customer_email ||
       (session.customer_details && session.customer_details.email) ||
@@ -69,7 +80,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // ✅ 2. Abonnement créé ou mis à jour (y compris en mode trialing)
+  // ✅ Abonnement créé ou mis à jour (trial ou actif)
   if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer;
@@ -82,13 +93,25 @@ export async function POST(req: Request) {
     }
   }
 
-  // ✅ 3. Paiement réussi via invoice
+  // ✅ Paiement validé (recurrent)
   if (event.type === "invoice.paid" || event.type === "invoice.payment_succeeded") {
     const invoice = event.data.object as Stripe.Invoice;
     const customerId = invoice.customer;
     const email = await getEmailFromCustomer(customerId as string);
     if (email) {
       await activateAbonnement(email, event.type);
+    }
+  }
+
+  // ❌ Abonnement annulé (résiliation)
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = subscription.customer;
+    const email = await getEmailFromCustomer(customerId as string);
+    if (email) {
+      await desactiverAbonnement(email, event.type);
+    } else {
+      console.warn(`${logPrefix} ⚠️ Email introuvable pour désactivation`);
     }
   }
 
