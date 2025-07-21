@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function Generateur() {
   const { data: session, status } = useSession();
-  const [abonnementActif, setAbonnementActif] = useState(false);
+  const [abonnementActif, setAbonnementActif] = useState<boolean | null>(null);
   const [avis, setAvis] = useState('');
   const [reponse, setReponse] = useState('');
   const [chargement, setChargement] = useState(false);
@@ -24,8 +24,10 @@ export default function Generateur() {
       setAbonnementActif(data.abonnement);
     };
 
-    verifierAbonnement();
-  }, [session]);
+    if (status === 'authenticated') {
+      verifierAbonnement();
+    }
+  }, [status, session]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,7 +57,7 @@ export default function Generateur() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || abonnementActif === null) {
     return <p className="text-white p-6">Chargement...</p>;
   }
 
