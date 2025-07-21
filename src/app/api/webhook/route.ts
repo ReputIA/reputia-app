@@ -40,7 +40,7 @@ async function getEmailFromCustomer(customerId: string): Promise<string | null> 
   try {
     const customer = await stripe.customers.retrieve(customerId);
     return typeof customer === 'object' && 'email' in customer ? customer.email ?? null : null;
-  } catch (err) {
+  } catch {
     console.warn(`⚠️ Erreur récupération client ${customerId} (client supprimé ?)`);
     return null;
   }
@@ -81,10 +81,7 @@ export async function POST(req: Request) {
   }
 
   // ✅ Abonnement créé ou mis à jour
-  if (
-    event.type === "customer.subscription.created" ||
-    event.type === "customer.subscription.updated"
-  ) {
+  if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
     const subscription = event.data.object as Stripe.Subscription;
     const metadataEmail = subscription.metadata?.email;
     const email = metadataEmail ?? await getEmailFromCustomer(subscription.customer as string);
