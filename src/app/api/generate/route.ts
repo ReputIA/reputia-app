@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // ⏱️ Dictionnaire simple pour enregistrer le timestamp des appels par IP
 const lastRequestPerIp = new Map<string, number>();
@@ -10,6 +13,17 @@ export async function POST(req: Request) {
 
   if (!session || !session.user?.email) {
     return NextResponse.json({ reply: "❌ Utilisateur non authentifié." }, { status: 401 });
+  }
+
+  const email = session.user.email.toLowerCase();
+
+  // 🔒 Vérifie si l'utilisateur a un abonnement actif
+  const user = await prisma.utilisateur.findUnique({
+    where: { email },
+  });
+
+  if (!user?.abonnement) {
+    return NextResponse.json({ reply: "🔒 Abonnement requis pour utiliser le générateur." }, { status: 403 });
   }
 
   // ⏱️ Protection anti-spam basique par IP
