@@ -9,37 +9,39 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 const prisma = new PrismaClient();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// ✅ Fonction pour activer l’abonnement
+// ✅ Activer abonnement
 async function activateAbonnement(email: string, source: string) {
   try {
     const updated = await prisma.utilisateur.updateMany({
       where: { email: email.toLowerCase() },
       data: { abonnement: true },
     });
-    console.log(`✅ [${source}] Abonnement activé pour ${email}`, updated);
+    console.log(`✅ [${source}] Abonnement ACTIVÉ pour ${email}`, updated);
   } catch (error) {
-    console.error(`❌ [${source}] Erreur activation :`, error);
+    console.error(`❌ [${source}] Erreur activation abonnement :`, error);
   }
 }
 
-// ❌ Fonction pour désactiver l’abonnement
+// ❌ Désactiver abonnement
 async function desactiverAbonnement(email: string, source: string) {
   try {
     const updated = await prisma.utilisateur.updateMany({
       where: { email: email.toLowerCase() },
       data: { abonnement: false },
     });
-    console.log(`❌ [${source}] Abonnement désactivé pour ${email}`, updated);
+    console.log(`❌ [${source}] Abonnement DÉSACTIVÉ pour ${email}`, updated);
   } catch (error) {
-    console.error(`❌ [${source}] Erreur désactivation :`, error);
+    console.error(`❌ [${source}] Erreur désactivation abonnement :`, error);
   }
 }
 
-// 🎯 Récupération email via ID client Stripe
+// 🔍 Récupérer email à partir de l'ID client Stripe
 async function getEmailFromCustomer(customerId: string): Promise<string | null> {
   try {
     const customer = await stripe.customers.retrieve(customerId);
-    return typeof customer === 'object' && 'email' in customer ? customer.email ?? null : null;
+    const email = typeof customer === 'object' && 'email' in customer ? customer.email ?? null : null;
+    console.log(`📧 Email récupéré depuis Stripe (customerId=${customerId}):`, email);
+    return email;
   } catch (err) {
     console.error(`❌ Erreur récupération email client ${customerId} :`, err);
     return null;
@@ -64,8 +66,9 @@ export async function POST(req: Request) {
   }
 
   const logPrefix = `🔔 [${event.type}]`;
+  console.log(`${logPrefix} Reçu`);
 
-  // ✅ Paiement validé via Checkout
+  // ✅ Paiement validé
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const email =
@@ -80,7 +83,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // ✅ Abonnement créé ou mis à jour (trial ou actif)
+  // ✅ Abonnement créé ou mis à jour
   if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer;
@@ -93,7 +96,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // ✅ Paiement validé (recurrent)
+  // ✅ Paiement récurrent
   if (event.type === "invoice.paid" || event.type === "invoice.payment_succeeded") {
     const invoice = event.data.object as Stripe.Invoice;
     const customerId = invoice.customer;
@@ -103,12 +106,16 @@ export async function POST(req: Request) {
     }
   }
 
-  // ❌ Abonnement annulé (résiliation)
+  // ❌ Abonnement annulé
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer;
+
+    console.log(`🔔 [customer.subscription.deleted] ID client : ${customerId}`);
+
     const email = await getEmailFromCustomer(customerId as string);
     if (email) {
+      console.log(`🛑 Désactivation de l’abonnement pour ${email}`);
       await desactiverAbonnement(email, event.type);
     } else {
       console.warn(`${logPrefix} ⚠️ Email introuvable pour désactivation`);
