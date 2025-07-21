@@ -13,9 +13,27 @@ export default function Generateur() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.email === 'support@reputia.fr') {
-      setAbonnementActif(true); // accès illimité pour l'admin
-    }
+    const fetchAbonnement = async () => {
+      if (!session?.user?.email) return;
+
+      if (session.user.email === 'support@reputia.fr') {
+        setAbonnementActif(true); // accès illimité pour admin
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/utilisateur');
+        const data = await res.json();
+
+        if (data.abonnement === true) {
+          setAbonnementActif(true);
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors de la vérification de l’abonnement :', error);
+      }
+    };
+
+    fetchAbonnement();
   }, [session]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
