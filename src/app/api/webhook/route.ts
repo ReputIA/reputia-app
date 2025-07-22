@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
@@ -9,19 +10,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 const prisma = new PrismaClient();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// ✅ Active l'abonnement + met à jour trial_end s’il y a
-async function activateAbonnement(email: string, source: string, trialEnd?: number) {
+// ✅ Active l'abonnement
+async function activateAbonnement(email: string, source: string) {
   try {
-    const updateData: any = { abonnement: true };
-
-    if (trialEnd) {
-      // Stripe fournit un timestamp en secondes → on convertit en Date JS
-      updateData.trial_end = new Date(trialEnd * 1000);
-    }
-
     const updated = await prisma.utilisateur.updateMany({
       where: { email: email.toLowerCase() },
-      data: updateData,
+      data: { abonnement: true },
     });
     console.log(`✅ [${source}] Abonnement activé pour ${email}`, updated);
   } catch (error) {
@@ -65,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-  } catch (err: unknown) {
+  } catch (err: any) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
     return new NextResponse(`❌ Erreur webhook : ${message}`, { status: 400 });
   }
@@ -94,8 +88,7 @@ export async function POST(req: Request) {
     const email = metadataEmail ?? await getEmailFromCustomer(subscription.customer as string);
 
     if (email && (subscription.status === "trialing" || subscription.status === "active")) {
-      const trialEnd = subscription.trial_end ?? undefined;
-      await activateAbonnement(email, event.type, trialEnd);
+      await activateAbonnement(email, event.type);
     }
   }
 
