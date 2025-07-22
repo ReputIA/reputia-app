@@ -24,6 +24,7 @@ model utilisateur {
   abonnement    Boolean  @default(false)
   emailVerified Boolean  @default(false)
   createdAt     DateTime @default(now())
+  trial_end       DateTime?
 }
 
 model message_support {

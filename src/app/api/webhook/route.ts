@@ -9,12 +9,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 const prisma = new PrismaClient();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// ✅ Active l'abonnement
-async function activateAbonnement(email: string, source: string) {
+// ✅ Active l'abonnement + met à jour trial_end s’il y a
+async function activateAbonnement(email: string, source: string, trialEnd?: number) {
   try {
+    const updateData: any = { abonnement: true };
+
+    if (trialEnd) {
+      // Stripe fournit un timestamp en secondes → on convertit en Date JS
+      updateData.trial_end = new Date(trialEnd * 1000);
+    }
+
     const updated = await prisma.utilisateur.updateMany({
       where: { email: email.toLowerCase() },
-      data: { abonnement: true },
+      data: updateData,
     });
     console.log(`✅ [${source}] Abonnement activé pour ${email}`, updated);
   } catch (error) {
@@ -87,7 +94,8 @@ export async function POST(req: Request) {
     const email = metadataEmail ?? await getEmailFromCustomer(subscription.customer as string);
 
     if (email && (subscription.status === "trialing" || subscription.status === "active")) {
-      await activateAbonnement(email, event.type);
+      const trialEnd = subscription.trial_end ?? undefined;
+      await activateAbonnement(email, event.type, trialEnd);
     }
   }
 
