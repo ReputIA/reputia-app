@@ -1,44 +1,45 @@
-'use client';
+'use client'
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Utilisateur {
-  id: number;
-  email: string;
-  nom: string;
-  prenom: string;
-  entreprise: string;
-  siret?: string;
-  adresse: string;
-  codePostal: string;
-  ville: string;
-  createdAt: string;
+  id: number
+  email: string
+  nom: string
+  prenom: string
+  entreprise: string
+  siret?: string
+  adresse: string
+  codePostal: string
+  ville: string
+  createdAt: string
+  abonnement: boolean
 }
 
 interface MessageSupport {
-  id: number;
-  email: string;
-  contenu: string;
-  reponse?: string;
-  createdAt: string;
+  id: number
+  email: string
+  contenu: string
+  reponse?: string
+  createdAt: string
 }
 
 export default function AdminPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  const [tab, setTab] = useState<'messages' | 'utilisateurs'>('messages');
-  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
-  const [messages, setMessages] = useState<MessageSupport[]>([]);
-  const [reponses, setReponses] = useState<{ [key: number]: string }>({});
+  const [tab, setTab] = useState<'messages' | 'utilisateurs'>('messages')
+  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([])
+  const [messages, setMessages] = useState<MessageSupport[]>([])
+  const [reponses, setReponses] = useState<{ [key: number]: string }>({})
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.email !== 'support@reputia.fr') {
-      router.push('/');
+      router.push('/')
     }
-  }, [session, status, router]);
+  }, [session, status, router])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,69 +47,69 @@ export default function AdminPage() {
         const [resMessages, resUsers] = await Promise.all([
           fetch('/api/admin/messages'),
           fetch('/api/admin/utilisateurs'),
-        ]);
+        ])
 
-        const messagesData = await resMessages.json();
-        const utilisateursData = await resUsers.json();
+        const messagesData = await resMessages.json()
+        const utilisateursData = await resUsers.json()
 
-        if (Array.isArray(messagesData)) setMessages(messagesData);
-        if (Array.isArray(utilisateursData)) setUtilisateurs(utilisateursData);
+        if (Array.isArray(messagesData)) setMessages(messagesData)
+        if (Array.isArray(utilisateursData)) setUtilisateurs(utilisateursData)
       } catch (err) {
-        console.error('❌ Erreur chargement admin :', err);
+        console.error('❌ Erreur chargement admin :', err)
       }
-    };
+    }
 
     if (session?.user?.email === 'support@reputia.fr') {
-      fetchData();
+      fetchData()
     }
-  }, [session]);
+  }, [session])
 
   const handleRepondre = async (id: number) => {
-    const reponse = reponses[id];
-    if (!reponse) return;
+    const reponse = reponses[id]
+    if (!reponse) return
 
     try {
       await fetch('/api/support/repondre', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, reponse }),
-      });
+      })
 
-      alert('✅ Réponse enregistrée !');
+      alert('✅ Réponse enregistrée !')
 
       setMessages((prev) =>
         prev.map((msg) => (msg.id === id ? { ...msg, reponse } : msg))
-      );
+      )
 
-      setReponses((prev) => ({ ...prev, [id]: '' }));
+      setReponses((prev) => ({ ...prev, [id]: '' }))
     } catch (error) {
-      console.error('❌ Erreur envoi réponse :', error);
-      alert('❌ Erreur lors de l’envoi');
+      console.error('❌ Erreur envoi réponse :', error)
+      alert('❌ Erreur lors de l’envoi')
     }
-  };
+  }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Supprimer ce message ?')) return;
+    if (!confirm('Supprimer ce message ?')) return
 
     try {
       const res = await fetch('/api/admin/supprimer-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
-      });
+      })
 
-      const data = await res.json();
+      const data = await res.json()
       if (data.success) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== id));
+        setMessages((prev) => prev.filter((msg) => msg.id !== id))
       }
     } catch (err) {
-      console.error('❌ Erreur suppression message :', err);
-      alert('❌ Erreur lors de la suppression');
+      console.error('❌ Erreur suppression message :', err)
+      alert('❌ Erreur lors de la suppression')
     }
-  };
+  }
 
-  if (status === 'loading') return <p className="text-white text-center py-10">Chargement...</p>;
-  if (session?.user?.email !== 'support@reputia.fr') return null;
+  if (status === 'loading') return <p className="text-white text-center py-10">Chargement...</p>
+  if (session?.user?.email !== 'support@reputia.fr') return null
 
   return (
     <div className="bg-[#1a1a1a] text-white min-h-screen p-8 font-sans">
@@ -195,24 +196,80 @@ export default function AdminPage() {
               <thead className="bg-[#333]">
                 <tr>
                   <th className="p-3 text-left">Nom</th>
-                  <th className="p-3 text-left">Prénom</th>
                   <th className="p-3 text-left">Email</th>
                   <th className="p-3 text-left">Entreprise</th>
-                  <th className="p-3 text-left">Adresse</th>
                   <th className="p-3 text-left">Ville</th>
                   <th className="p-3 text-left">Créé le</th>
+                  <th className="p-3 text-left">Abonnement</th>
+                  <th className="p-3 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {utilisateurs.map((u) => (
                   <tr key={u.id} className="border-t border-gray-700">
-                    <td className="p-2">{u.nom}</td>
-                    <td className="p-2">{u.prenom}</td>
+                    <td className="p-2">{u.nom} {u.prenom}</td>
                     <td className="p-2">{u.email}</td>
                     <td className="p-2">{u.entreprise}</td>
-                    <td className="p-2">{u.adresse}</td>
                     <td className="p-2">{u.ville}</td>
                     <td className="p-2">{new Date(u.createdAt).toLocaleDateString()}</td>
+                    <td className="p-2">
+                      {u.abonnement ? (
+                        <span className="text-green-400">✅</span>
+                      ) : (
+                        <span className="text-red-400">❌</span>
+                      )}
+                    </td>
+                    <td className="p-2">
+                      {u.abonnement ? (
+                        <button
+                          className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-xs"
+                          onClick={async () => {
+                            const res = await fetch('/api/admin/desactiver-gratuit', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: u.id }),
+                            })
+
+                            if (res.ok) {
+                              alert('⛔ Accès coupé')
+                              setUtilisateurs((prev) =>
+                                prev.map((user) =>
+                                  user.id === u.id ? { ...user, abonnement: false } : user
+                                )
+                              )
+                            } else {
+                              alert('❌ Erreur désactivation')
+                            }
+                          }}
+                        >
+                          Couper accès
+                        </button>
+                      ) : (
+                        <button
+                          className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1 rounded text-xs"
+                          onClick={async () => {
+                            const res = await fetch('/api/admin/activer-gratuit', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: u.id }),
+                            })
+
+                            if (res.ok) {
+                              alert('✅ Accès gratuit activé')
+                              setUtilisateurs((prev) =>
+                                prev.map((user) =>
+                                  user.id === u.id ? { ...user, abonnement: true } : user
+                                )
+                              )
+                            } else {
+                              alert('❌ Erreur activation')
+                            }
+                          }}
+                        >
+                          Donner accès gratuit
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -221,5 +278,5 @@ export default function AdminPage() {
         </>
       )}
     </div>
-  );
+  )
 }
