@@ -62,41 +62,53 @@ export default function Home() {
           <br /><br />
           ReputIA répond automatiquement à chaque avis reçu, 24h/24, avec un ton humain, professionnel et rassurant. Vous économisez un temps précieux tout en renvoyant une image exemplaire.
         </p>
+        
+        {/* Témoignages clients */}
+<h2 className="text-3xl font-bold text-[#FFD700] mb-8 mt-20">
+  🌟 Ils nous font confiance :
+</h2>
 
-        {/* Exemples de réponses générées */}
-        <h2 className="text-3xl font-bold text-[#FFD700] mb-8 mt-20">
-          🤖 Voici des exemples de réponse d’avis Google générées par ReputIA :
-        </h2>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 max-w-6xl mx-auto">
+  {[
+    {
+      nom: "Camille R.",
+      metier: "restauratrice",
+      texte: "Grâce à ReputIA, je gagne un temps fou à ne plus devoir répondre à chaque avis. Tout est pro, humain, et parfaitement formulé. Merci encore !"
+    },
+    {
+      nom: "Julien B.",
+      metier: "garagiste",
+      texte: "J’ai un garage auto et je n’avais jamais le temps de gérer les avis Google. ReputIA fait tout pour moi et mes clients le remarquent. C’est top."
+    },
+    {
+      nom: "Sophie L.",
+      metier: "coiffeuse",
+      texte: "Mes clientes laissent souvent des avis, mais je ne répondais jamais... Maintenant, chaque avis reçoit une réponse soignée. J’adore ce service !"
+    },
+    {
+      nom: "Antoine G.",
+      metier: "fleuriste",
+      texte: "ReputIA m’a simplifié la vie. Les réponses sont naturelles, rapides, et ça renforce l’image de ma boutique. Un vrai plus pour le commerce local."
+    },
+    {
+      nom: "Nora M.",
+      metier: "gérante e-commerce",
+      texte: "J’avais besoin d’un moyen d’automatiser mes réponses clients sans perdre en qualité. ReputIA coche toutes les cases. Je recommande à 100%."
+    },
+    {
+      nom: "Patrick T.",
+      metier: "photographe",
+      texte: "Depuis que j’utilise ReputIA, j’ai reçu plus de demandes car mes avis sont tous bien mis en valeur. C’est devenu un vrai atout marketing."
+    },
+  ].map((avis, i) => (
+    <div key={i} className="bg-[#2a2a2a] p-6 rounded-2xl shadow text-left">
+      <p className="text-sm text-yellow-300 mb-1">⭐️⭐️⭐️⭐️⭐️</p>
+      <p className="text-sm text-gray-400 mb-2">— {avis.nom} ({avis.metier})</p>
+      <p className="text-white">🗣️ <span className="text-gray-300">{avis.texte}</span></p>
+    </div>
+  ))}
+</div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 max-w-6xl mx-auto">
-          {["Claire G.", "Marc D.", "Nathalie B.", "Kevin S.", "Laura J.", "Bruno T."].map((nom, i) => {
-            const avis = [
-              'Une équipe au top, service impeccable et rapide. Je recommande sans hésiter !',
-              'Toujours aussi satisfait. Accueil chaleureux et service au rendez-vous.',
-              'Très bonne première expérience. Facile, rapide, et super efficace.',
-              'Ma commande est arrivée avec 2 jours de retard, un peu déçu.',
-              'L’accueil était un peu froid, mais le travail a été bien fait.',
-              'Bonne qualité mais attente un peu longue sur place.'
-            ];
-            const reponses = [
-              'Merci beaucoup pour votre recommandation Claire ! C’est un plaisir de vous accompagner. À très bientôt 😊',
-              'Un grand merci Marc pour votre fidélité et votre retour positif. À très bientôt dans notre établissement !',
-              'Merci Nathalie ! Nous sommes ravis que votre première visite se soit bien passée. Nous restons à votre écoute !',
-              'Bonjour Kevin, nous sommes désolés pour ce retard. Nous faisons le nécessaire pour éviter que cela ne se reproduise. Merci pour votre compréhension.',
-              'Bonjour Laura, merci pour votre retour. Nous allons sensibiliser notre équipe pour améliorer cet aspect. Heureux que la prestation vous ait plu malgré tout !',
-              'Merci Bruno pour votre retour. Nous allons optimiser notre organisation pour mieux gérer l’attente. À bientôt !'
-            ];
-            const stars = ['⭐️⭐️⭐️⭐️⭐️', '⭐️⭐️⭐️⭐️⭐️', '⭐️⭐️⭐️⭐️⭐️', '⭐️⭐️', '⭐️⭐️⭐️', '⭐️⭐️⭐️'];
-            return (
-              <div key={i} className="bg-[#2a2a2a] p-6 rounded-2xl shadow text-left">
-                <p className="text-sm text-gray-400 mb-1">{stars[i]}</p>
-                <p className="text-sm text-yellow-300 mb-2">— {nom}</p>
-                <p className="mb-2 text-white">🗣️ <span className="text-gray-300">{avis[i]}</span></p>
-                <p className="text-sm text-green-400">💬 ReputIA : {reponses[i]}</p>
-              </div>
-            );
-          })}
-        </div>
 
         {/* Offre + explication */}
         <div className="bg-[#2a2a2a] p-8 rounded-3xl shadow-xl max-w-4xl mx-auto flex flex-col md:flex-row gap-8 text-left md:text-center">
