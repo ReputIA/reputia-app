@@ -24,12 +24,18 @@ export async function POST(req: Request) {
   const body = await req.text();
   let event: Stripe.Event;
 
-  try {
+    try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err: any) {
-    console.error("❌ Erreur vérification webhook Stripe :", err.message);
-    return new NextResponse(`Webhook error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("❌ Erreur vérification webhook Stripe :", err.message);
+      return new NextResponse(`Webhook error: ${err.message}`, { status: 400 });
+    }
+
+    console.error("❌ Erreur vérification webhook Stripe (inconnue) :", err);
+    return new NextResponse("Webhook error: unknown error", { status: 400 });
   }
+
 
   try {
     // ✅ Quand un paiement d'abonnement est terminé

@@ -15,7 +15,7 @@ if (!stripeSecretKey || !appUrl) {
 
 const stripe = new Stripe(stripeSecretKey as string);
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
