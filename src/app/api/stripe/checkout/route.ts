@@ -13,7 +13,7 @@ if (!stripeSecretKey || !priceAbo || !appUrl) {
 
 const stripe = new Stripe(stripeSecretKey as string);
 
-export async function POST(_req: Request) {
+export async function POST() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
