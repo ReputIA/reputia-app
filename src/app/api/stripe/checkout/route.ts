@@ -7,6 +7,7 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const priceAbo = process.env.STRIPE_PRICE_ABO;
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
+// Petit log serveur au cas où une var manque
 if (!stripeSecretKey || !priceAbo || !appUrl) {
   console.error("❌ Configuration Stripe incomplète côté serveur :", {
     hasSecret: !!stripeSecretKey,
@@ -15,11 +16,8 @@ if (!stripeSecretKey || !priceAbo || !appUrl) {
   });
 }
 
-const stripe = stripeSecretKey
-  ? new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
-    })
-  : null;
+// On laisse Stripe choisir sa propre apiVersion (on ne force plus)
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
 export async function POST() {
   const session = await getServerSession(authOptions);
@@ -61,8 +59,7 @@ export async function POST() {
     }
 
     return NextResponse.json({ url: checkoutSession.url });
-   } catch (error: unknown) {
-    // 🔍 LOG côté serveur
+  } catch (error: unknown) {
     console.error("❌ Erreur création session Stripe :", error);
 
     let message = "Erreur côté serveur Stripe";
@@ -77,7 +74,6 @@ export async function POST() {
       { status: 500 }
     );
   }
-
 }
 
 export const dynamic = "force-dynamic";
