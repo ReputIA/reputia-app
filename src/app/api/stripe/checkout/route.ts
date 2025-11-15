@@ -61,14 +61,15 @@ export async function POST() {
     }
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (error: unknown) {
+   } catch (error: unknown) {
     // 🔍 LOG côté serveur
     console.error("❌ Erreur création session Stripe :", error);
 
     let message = "Erreur côté serveur Stripe";
 
-    if (error && typeof error === "object" && "message" in error) {
-      message = String((error as any).message);
+    if (typeof error === "object" && error !== null && "message" in error) {
+      const e = error as { message?: unknown };
+      message = String(e.message ?? "Erreur côté serveur Stripe");
     }
 
     return NextResponse.json(
@@ -76,6 +77,7 @@ export async function POST() {
       { status: 500 }
     );
   }
+
 }
 
 export const dynamic = "force-dynamic";
