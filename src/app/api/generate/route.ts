@@ -9,24 +9,28 @@ const prisma = new PrismaClient();
 const lastRequestPerIp = new Map<string, number>();
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  // On récupère la session, mais on n'en fait plus une condition obligatoire
+  const session = await getServerSession(authOptions).catch(() => null);
 
-  if (!session || !session.user?.email) {
-    return NextResponse.json({ reply: "❌ Utilisateur non authentifié." }, { status: 401 });
+  const email = session?.user?.email ? session.user.email.toLowerCase() : null;
+
+  // 🔒 Si l'utilisateur est connecté, on vérifie l'abonnement en base
+  if (email) {
+    const user = await prisma.utilisateur.findUnique({
+      where: { email },
+    });
+
+    if (!user?.abonnement) {
+      return NextResponse.json(
+        { reply: "🔒 Abonnement requis pour utiliser le générateur avec ce compte." },
+        { status: 403 }
+      );
+    }
   }
 
-  const email = session.user.email.toLowerCase();
+  // 👉 Si pas de session : on laisse passer (essai gratuit géré côté front avec localStorage)
 
-  // 🔒 Vérifie si l'utilisateur a un abonnement actif
-  const user = await prisma.utilisateur.findUnique({
-    where: { email },
-  });
-
-  if (!user?.abonnement) {
-    return NextResponse.json({ reply: "🔒 Abonnement requis pour utiliser le générateur." }, { status: 403 });
-  }
-
-  // ⏱️ Protection anti-spam basique par IP
+  // ⏱️ Protection anti-spam basique par IP (valable pour tout le monde)
   const ip = req.headers.get("x-forwarded-for") || "unknown";
   const now = Date.now();
   const lastCall = lastRequestPerIp.get(ip);
@@ -42,8 +46,18 @@ export async function POST(req: Request) {
 
   const { prompt } = await req.json();
 
+  if (!prompt || !prompt.trim()) {
+    return NextResponse.json(
+      { reply: "❌ Aucun avis fourni. Veuillez coller un avis client." },
+      { status: 400 }
+    );
+  }
+
   if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ reply: "❌ Clé API OpenAI manquante." }, { status: 500 });
+    return NextResponse.json(
+      { reply: "❌ Clé API OpenAI manquante." },
+      { status: 500 }
+    );
   }
 
   try {
@@ -59,11 +73,11 @@ export async function POST(req: Request) {
           {
             role: "system",
             content:
-              "Tu es une IA spécialisée dans la rédaction de réponses aux avis Google. Réponds toujours de façon professionnelle, empathique et rassurante.",
+              "Tu es une IA spécialisée dans la rédaction de réponses aux avis clients (Google, Airbnb, Booking, Facebook, etc.). Réponds toujours de façon professionnelle, empathique et rassurante, en français.",
           },
           {
             role: "user",
-            content: `Voici un avis client : "${prompt}". Rédige une réponse adaptée.`,
+            content: `Voici un avis client : "${prompt}". Rédige une réponse adaptée, professionnelle et humaine pour cet avis.`,
           },
         ],
         temperature: 0.7,

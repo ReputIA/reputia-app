@@ -16,13 +16,13 @@ const Connexion: React.FC = () => {
       redirect: false,
       email,
       password,
-      callbackUrl: '/dashboard',
+      callbackUrl: '/',
     });
 
     if (result?.error) {
       setErrorMsg('❌ Identifiants incorrects. Veuillez réessayer.');
     } else {
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     }
   };
 

@@ -45,7 +45,7 @@ export default function Inscription() {
 
       setMessage('✅ Compte créé avec succès ! Redirection...');
       setTimeout(() => {
-        router.push('/dashboard/abonnement');
+        router.push('/');
       }, 1500);
     } catch (err) {
       if (err instanceof Error) {
