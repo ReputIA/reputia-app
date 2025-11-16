@@ -5,18 +5,21 @@ import Stripe from "stripe";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const priceAbo = process.env.STRIPE_PRICE_ABO;
-const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+const appUrlEnv = process.env.NEXT_PUBLIC_APP_URL;
 
 // Petit log serveur au cas où une var manque
-if (!stripeSecretKey || !priceAbo || !appUrl) {
+if (!stripeSecretKey || !priceAbo || !appUrlEnv) {
   console.error("❌ Configuration Stripe incomplète côté serveur :", {
     hasSecret: !!stripeSecretKey,
     hasPrice: !!priceAbo,
-    hasAppUrl: !!appUrl,
+    hasAppUrl: !!appUrlEnv,
   });
 }
 
-// On laisse Stripe choisir sa propre apiVersion (on ne force plus)
+// On nettoie l'URL (supprime les espaces / retours à la ligne autour)
+const appUrl = appUrlEnv ? appUrlEnv.trim() : null;
+
+// On laisse Stripe choisir sa propre apiVersion
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
 export async function POST() {
@@ -37,6 +40,9 @@ export async function POST() {
   }
 
   try {
+    const successUrl = `${appUrl}/avis?success=1`;
+    const cancelUrl = `${appUrl}/avis?canceled=1`;
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
@@ -47,8 +53,8 @@ export async function POST() {
         },
       ],
       customer_email: session.user.email.toLowerCase(),
-      success_url: `${appUrl}/avis?success=1`,
-      cancel_url: `${appUrl}/avis?canceled=1`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
     });
 
     if (!checkoutSession.url) {
