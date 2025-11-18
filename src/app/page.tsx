@@ -36,10 +36,10 @@ export default function Home() {
                 👋 {session?.user?.name || 'Utilisateur'}
               </span>
               <Link
-               href="/profil"
-               className="bg-[#FFD700] text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-yellow-400 transition"
+                href="/profil"
+                className="bg-[#FFD700] text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-yellow-400 transition"
               >
-               Mon compte
+                Mon compte
               </Link>
             </>
           ) : (
@@ -69,7 +69,8 @@ export default function Home() {
             Suite d’outils IA pour les professionnels
           </h1>
           <p className="text-lg md:text-xl text-gray-300">
-            ReputIA, société française indépendante, développe des outils IA fiables et accessibles pour aider les professionnels à optimiser leur image et leurs tâches essentielles.
+            ReputIA, société française indépendante, développe des outils IA fiables et accessibles
+            pour aider les professionnels à optimiser leur image et leurs tâches essentielles.
           </p>
         </div>
 
@@ -77,32 +78,46 @@ export default function Home() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Carte Avis Google */}
           <Link
-  href="/avis"
-  className="group bg-[#2a2a2a] rounded-3xl p-8 shadow-xl border border-transparent 
-             hover:border-[#FFD700] hover:-translate-y-1 transition transform 
-             cursor-pointer flex flex-col justify-between no-underline text-white"
->
-  <div>
-    <h2 className="text-2xl font-bold mb-3 text-[#FFD700] flex items-center gap-2">
-      📝 Avis Google
-    </h2>
-    <p className="text-gray-300 mb-4">
-      Collez un avis Google, Airbnb, Booking, Trustpilot… et obtenez une réponse
-      professionnelle, humaine et rassurante en quelques secondes.
-    </p>
-    <ul className="text-sm text-gray-400 space-y-1 mb-6">
-      <li>• Gagnez du temps sur la gestion de vos avis</li>
-      <li>• Renforcez votre image auprès de vos clients</li>
-      <li>• Idéal pour restaurants, garages, salons, commerces locaux…</li>
-    </ul>
-  </div>
-  <div className="flex items-center justify-between mt-2">
-    <span className="text-sm text-gray-400">Outil disponible</span>
-    <span className="inline-flex items-center gap-2 bg-[#FFD700] text-black px-4 py-2 rounded-xl text-sm font-semibold group-hover:bg-yellow-400 transition">
-      Générateur d’avis
-    </span>
-  </div>
-</Link>
+            href="/avis"
+            className="group bg-[#2a2a2a] rounded-3xl p-8 shadow-xl border border-transparent 
+                       hover:border-[#FFD700] hover:-translate-y-1 transition transform 
+                       cursor-pointer flex flex-col justify-between no-underline text-white"
+          >
+            <div>
+              {/* Bandeau essai gratuit */}
+              <div className="mb-4">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD700] text-black text-xs font-semibold">
+                  ⭐ Essai gratuit – Cliquez ici pour tester
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-bold mb-3 text-[#FFD700] flex items-center gap-2">
+                📝 Générateur de réponses aux avis
+              </h2>
+              <p className="text-gray-300 mb-4">
+                Collez un avis Google, Airbnb, Booking, Trustpilot… et obtenez une réponse
+                professionnelle, humaine et rassurante en quelques secondes.
+              </p>
+              <ul className="text-sm text-gray-400 space-y-1 mb-6">
+                <li>• Gagnez du temps sur la gestion de vos avis</li>
+                <li>• Renforcez votre image auprès de vos clients</li>
+                <li>• Idéal pour restaurants, garages, salons, commerces locaux…</li>
+              </ul>
+            </div>
+            <div className="flex flex-col gap-2 mt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">
+                  1er essai gratuit, puis illimité pour 9,99€ / mois
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500">Outil disponible</span>
+                <span className="inline-flex items-center gap-2 bg-[#FFD700] text-black px-4 py-2 rounded-xl text-sm font-semibold group-hover:bg-yellow-400 transition">
+                  Essayer gratuitement →
+                </span>
+              </div>
+            </div>
+          </Link>
 
           {/* Carte ScanSecure (bientôt) */}
           <div className="bg-[#202020] rounded-3xl p-8 shadow-xl border border-dashed border-gray-600 flex flex-col justify-between opacity-85">
